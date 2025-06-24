@@ -1,11 +1,13 @@
 package com.example.bai2.service;
 
 import com.example.bai2.model.Feedback;
+import com.example.bai2.repository.FeedBackRepository;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -16,57 +18,23 @@ import java.util.List;
 
 @Service
 public class FeedbackService implements IFeedbackService {
-    private static SessionFactory sessionFactory;
-    private static EntityManager entityManager;
-    static {
-        try {
-            sessionFactory = new Configuration()
-                    .configure("hibernate.cfg.xml")
-                    .buildSessionFactory();
-            entityManager = sessionFactory.createEntityManager();
-        } catch (HibernateException e) {
-            e.printStackTrace();
-        }
-    }
+    @Autowired
+    private FeedBackRepository feedBackRepository;
 
     @Override
     public List<Feedback> findAll() {
-        String queryStr = "SELECT  f FROM Feedback f WHERE f.date = :todayDate ORDER BY f.id DESC";
-        TypedQuery<Feedback> query = entityManager.createQuery(queryStr, Feedback.class);
-        query.setParameter("todayDate", LocalDate.now());
-        return query.getResultList();
+        return feedBackRepository.findAll();
     }
 
 
     @Override
     public Feedback findById(long id) {
-        Session  session = sessionFactory.openSession();
-        Feedback feedback = session.get(Feedback.class, id);
-        session.close();
-        return feedback;
+     return feedBackRepository.findById(id).get();
     }
 
     @Override
     public void save(Feedback feedback) {
-        Transaction transaction = null;
-        Session session = null;
-        try{
-            session = sessionFactory.openSession();
-            transaction = session.beginTransaction();
-
-            feedback.setDate(LocalDate.now());
-            session.saveOrUpdate(feedback);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }finally {
-            if (session != null) {
-                session.close();
-            }
-        }
+       feedBackRepository.save(feedback);
     }
 
     @Override
@@ -74,7 +42,7 @@ public class FeedbackService implements IFeedbackService {
     Feedback feedback = findById(id);
     if (feedback != null) {
         feedback.setLikes(feedback.getLikes() + 1);
-        save(feedback);
+        feedBackRepository.save(feedback);
     }
     }
 }
