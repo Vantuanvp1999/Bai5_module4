@@ -39,7 +39,7 @@
 <hr>
 
 <h2>Để lại bình luận của bạn</h2>
-<form th:action="@{/comment}" method="post" th:object="${newFeedback}">
+<form th:action="@{/feedbacks/comment}" method="post" th:object="${newFeedback}">
     <div class="form-group">
         <label for="author">Tên của bạn:</label>
         <input type="text" id="author" th:field="*{author}" required>
